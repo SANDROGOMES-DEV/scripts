@@ -1,35 +1,46 @@
 import os
-import platform
 import shutil
+from pathlib import Path
 from datetime import datetime
 
 def executar_manutencao():
-    print("--- INICIANDO AUTOMACAO PYTHON ---")
+    print("--- INICIANDO AUTOMACAO HIBRIDA ---")
     
-    # 1. Informações do Sistema
-    print(f"Sistema: {platform.system()} {platform.release()}")
+    # Define o caminho da pasta Downloads de forma absoluta
+    path = Path.home() / "Downloads"
     
-    # 2. Automação de Arquivos: Organizar Downloads (Exemplo)
-    # Move arquivos .txt e .pdf para uma pasta de 'Documentos_Organizados'
-    path = os.path.expanduser("~/Downloads")
-    target = os.path.join(path, "Documentos_Organizados")
-    
-    if not os.path.exists(target):
-        os.makedirs(target)
-        
+    if not path.exists():
+        print(f"[!] Erro: A unidade ou caminho {path} nao existe.")
+        return
+
+    # Mapeamento de pastas
+    organizacao = {
+        "Documentos": [".pdf", ".docx", ".txt", ".xlsx"],
+        "Imagens": [".jpg", ".png", ".gif", ".webp"],
+        "Videos": [".mp4", ".mkv"],
+        "Instaladores": [".exe", ".msi"]
+    }
+
     contagem = 0
-    for arquivo in os.listdir(path):
-        if arquivo.endswith((".pdf", ".txt", ".docx")):
-            shutil.move(os.path.join(path, arquivo), os.path.join(target, arquivo))
-            contagem += 1
+
+    # Itera sobre os arquivos usando Path (mais seguro que os.listdir)
+    for item in path.iterdir():
+        if item.is_file():
+            ext = item.suffix.lower()
             
-    # 3. Gerar Log de Execução
-    data_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    with open("log_automacao.txt", "a") as log:
-        log.write(f"Executado em {data_atual} - Arquivos organizados: {contagem}\n")
-    
-    print(f"Sucesso! {contagem} arquivos foram organizados.")
-    print(f"Log atualizado em: {os.getcwd()}/log_automacao.txt")
+            for pasta, extensoes in organizacao.items():
+                if ext in extensoes:
+                    pasta_alvo = path / pasta
+                    pasta_alvo.mkdir(exist_ok=True)
+                    
+                    try:
+                        shutil.move(str(item), str(pasta_alvo / item.name))
+                        print(f"[v] {item.name} -> {pasta}")
+                        contagem += 1
+                    except Exception as e:
+                        print(f"[!] Erro ao mover {item.name}: {e}")
+
+    print(f"\nSucesso: {contagem} arquivos organizados.")
 
 if __name__ == "__main__":
     executar_manutencao()
