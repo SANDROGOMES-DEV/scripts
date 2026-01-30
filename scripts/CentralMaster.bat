@@ -68,14 +68,20 @@ goto menu
 :: --- CLASSE 5: HIBRIDA (Abaixo explicada em detalhes) ---
 :classe_hibrida
 cls
+:: Força o script a reconhecer a pasta onde ele está salvo
+cd /d "%~dp0"
+echo [HIBRIDO] Local atual: %cd%
+echo [v] Verificando ambiente...
+
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [!] Python nao encontrado. Executando automacao em Batch nativo...
-    goto classe_otimizar
+    echo [!] Erro: Python nao encontrado no PATH.
+    pause
+    goto menu
 ) else (
-    echo [v] Python detectado! Iniciando script inteligente...
-    :: Se você tiver um arquivo .py, ele chamaria aqui:
-    :: python seu_script.py
+    echo [v] Python detectado! Iniciando automacao.py...
+    :: Chama o python garantindo que ele procure o arquivo na mesma pasta
+    python "%~dp0automacao.py"
     pause
     goto menu
 )
