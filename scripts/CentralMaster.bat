@@ -11,6 +11,8 @@ echo ========================================================
 echo [1] LINKS      [2] OTIMIZAR PC    [3] REDE
 echo [4] SISTEMA    [5] PYTHON HIBRIDO [6] ANDROID (ADB)
 echo [7] SAIR
+echo [8] SEGURANCA  - Auditoria de Senhas
+
 echo ========================================================
 set /p escolha=Selecione uma opcao: 
 
@@ -21,12 +23,13 @@ if "%escolha%"=="4" goto classe_sistema
 if "%escolha%"=="5" goto classe_hibrida
 if "%escolha%"=="6" goto classe_android
 if "%escolha%"=="7" exit
+if "%escolha%"=="8" goto classe_seguranca
 goto menu
 :: --- CLASSE 1: LINKS ---
 :classe_links
 cls
 echo Abrindo ferramentas de trabalho e estudo...
-start chrome "https://github.com" "https://www.w3schools.com/python/" "https://youtube.com"
+start chrome "https://portalwfm.hapvida.com.br/sisqualIdentityServer/core/login?signin=ef11be1cd5fb328f715cf7a9bc18f826" "https://hapvidandi.beedoo.io/feed" "https://th3exe.github.io/bat-system/busca.html" "https://teams.microsoft.com/v2/" "https://docs.google.com/document/d/1z3eFgQkzXhO8INNo6mkiN2CO8_LAu9h1CYLuQoV0USc/edit?tab=t.0" "https://github.com" "https://www.w3schools.com/python/" 
 echo.
 echo Abas abertas com sucesso!
 timeout /t 3 >nul
@@ -68,24 +71,23 @@ goto menu
 :: --- CLASSE 5: HIBRIDA (Abaixo explicada em detalhes) ---
 :classe_hibrida
 cls
-:: Força o script a reconhecer a pasta onde ele está salvo
-cd /d "%~dp0"
-echo [HIBRIDO] Local atual: %cd%
-echo [v] Verificando ambiente...
-
+echo [HIBRIDO] Verificando ambiente...
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [!] Erro: Python nao encontrado no PATH.
+    echo [!] Erro: Python nao instalado ou nao adicionado ao PATH.
+    echo Tentando abrir via navegador para instalacao...
+    start chrome "https://www.python.org/downloads/"
     pause
     goto menu
 ) else (
-    echo [v] Python detectado! Iniciando automacao.py...
-    :: Chama o python garantindo que ele procure o arquivo na mesma pasta
-    python "%~dp0automacao.py"
+    echo [v] Python detectado! 
+    echo [v] Executando 'automacao.py'...
+    echo ----------------------------------------------------
+    python automacao.py
+    echo ----------------------------------------------------
     pause
     goto menu
 )
-
 :: --- CLASSE 6: ANDROID (NOVO) ---
 :classe_android
 cls
@@ -118,7 +120,32 @@ if "%op_android%"=="3" (
     pause
     goto menu
 )
+
+:: No final do arquivo, adicione a Classe:
+:classe_seguranca
+cls
+:: Define o caminho absoluto baseado na localização do arquivo .bat
+pushd "%~dp0"
+echo [SEGURANCA] Local: %cd%
+echo [SEGURANCA] Verificando ambiente Python...
+
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [!] Instale o Python para usar este modulo.
+    popd
+    pause
+    goto menu
+) else (
+    echo [v] Preparando bibliotecas...
+    python -m pip install requests cryptography >nul 2>&1
+    python seguranca.py
+    popd
+    pause
+    goto menu
+)
+
 if "%op_android%"=="4" goto menu
 goto classe_android
 
 :: ... (mantenha aqui as outras classes de links, otimização, etc.)
+
