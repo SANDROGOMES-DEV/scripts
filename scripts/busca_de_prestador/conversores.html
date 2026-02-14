@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversores - Extrair Texto</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="btnMenu" class="botao-expandir" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+    </button>
+
+    <nav id="menuLateral" class="menu-lateral">
+        <a href="inicio.html" class="nav-link">Início</a>
+        <a href="index.html" class="nav-link">Busca de Prestador</a>
+        <a href="procedimentos.html" class="nav-link">Procedimentos</a>
+        <a href="conversores.html" class="nav-link">Conversores</a>
+        <a href="zonas_RJ.html" class="nav-link">Zonas RJ</a>
+    </nav>
+
+    <div class="container">
+        <header style="border-bottom: 2px solid var(--secondary); margin-bottom: 20px; padding-bottom: 10px;">
+            <h1 style="margin: 0;">Extrair Texto de Imagem (OCR)</h1>
+        </header>
+
+        <p style="color: #666; margin-bottom: 25px;">
+            Selecione uma imagem para extrair o texto automaticamente de forma local.
+        </p>
+
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+            <label style="cursor: pointer; font-weight: bold; color: var(--accent);">
+                Clique aqui para selecionar uma imagem ou arraste o ficheiro
+            </label>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+            
+            <center>
+                <img id="preview" class="preview-img" src="#" alt="Pré-visualização">
+            </center>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+            <button onclick="processarImagem()" class="app-button search-button">
+                Iniciar Extração
+            </button>
+            <button onclick="copiarTexto()" class="app-button" style="background-color: var(--primary);">
+                Copiar Texto
+            </button>
+        </div>
+
+        <div id="status-ocr" style="text-align: center; margin-top: 15px; font-weight: bold; color: var(--accent);">
+            Aguardando imagem...
+        </div>
+
+        <textarea id="output" placeholder="O texto extraído aparecerá aqui..."></textarea>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script>
+        // Função do Menu Lateral
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('aberto');
+        }
+
+        const fileInput = document.getElementById('file-input');
+        const preview = document.getElementById('preview');
+        const output = document.getElementById('output');
+        const status = document.getElementById('status-ocr');
+
+        // Pré-visualização da imagem
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+                status.innerText = "Imagem carregada. Clique em 'Iniciar Extração'.";
+            }
+        };
+
+        // Processamento OCR
+        async function processarImagem() {
+            const file = fileInput.files[0];
+            if (!file) return alert("Selecione uma imagem primeiro!");
+
+            status.innerText = "A processar... Por favor, aguarde.";
+            output.value = "";
+
+            try {
+                const result = await Tesseract.recognize(file, 'por', {
+                    logger: m => {
+                        if(m.status === 'recognizing text') {
+                            status.innerText = `Extração: ${Math.round(m.progress * 100)}%`;
+                        }
+                    }
+                });
+                output.value = result.data.text;
+                status.innerText = "Extração concluída!";
+            } catch (err) {
+                status.innerText = "Erro ao processar a imagem.";
+                console.error(err);
+            }
+        }
+
+        function copiarTexto() {
+            if (!output.value) return alert("Não há texto para copiar!");
+            output.select();
+            document.execCommand('copy');
+            alert("Texto copiado para a área de transferência!");
+        }
+    </script>
+</body>
+</html>

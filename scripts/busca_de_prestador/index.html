@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Busca de Rede Médica Pro - SP/RJ</title>
+  
+</head>
+<body>
+
+    <button id="btnMenu" class="botao-expandir" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+</button>
+
+<div class="inicio"><h1>Seja bem-vindo(a)!</h1></div>
+
+<nav id="menuLateral" class="menu-lateral">
+    <a href="inicio.html" class="nav-link">Início</a>
+    <a href="index.html" class="nav-link">Busca de Prestador</a>
+    <a href="conversores.html" class="nav-link">Conversores</a>
+    <a href="procedimentos.html" class="nav-link">Procedimentos</a>
+    <a href="zonas_RJ.html" class="nav-link">Zonas RJ</a>
+</nav>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('menuLateral').classList.toggle('aberto');
+    }
+</script>
+
+<div class="container">
+    <header>
+        <h1>Localizador de Rede SP & RJ</h1>
+        <p>Consulte prestadores por região e tipo de rede</p>
+    </header>
+
+    <div class="filter-box">
+        <input type="text" id="mainBusca" placeholder="Buscar por CNPJ ou Nome...">
+        
+        <select id="zonaFiltro">
+            <option value="">Todas as Zonas</option>
+            <optgroup label="SÃO PAULO">
+                <option value="CENTRAL">SP - Central</option>
+                <option value="LESTE">SP - Leste</option>
+                <option value="NORTE">SP - Norte</option>
+                <option value="OESTE">SP - Oeste</option>
+                <option value="SUL">SP - Sul</option>
+                <option value="ABC PAULISTA">SP - ABC Paulista</option>
+            </optgroup>
+            <optgroup label="RIO DE JANEIRO">
+                <option value="CENTRAL">RJ - Central</option>
+                <option value="NORTE">RJ - Norte</option>
+                <option value="NORTE FLUMINENSE">RJ - Zona Fluminense</option>
+                <option value="SUL">RJ - Sul</option>
+                <option value="LESTE">RJ - Leste</option>
+                <option value="OESTE">RJ - Oeste</option>
+                <option value="BAIXADA FLUMINENSE">RJ - Baixada Fluminense</option>
+            </optgroup>
+        </select>
+
+        <select id="tipoFiltro">
+            <option value="">Rede Própria e Credenciada</option>
+            <option value="propria">Rede Própria (Verde)</option>
+            <option value="credenciada">Rede Credenciada (Vermelho)</option>
+        </select>
+    </div>
+
+    <div id="results"></div>
+</div>
+
+<script src="dados.js"></script>
+
+<script>
+    const resultsDiv = document.getElementById('results');
+
+    function render(data) {
+        // Usamos a classe grid-prestadores para manter o layout lado a lado
+        resultsDiv.className = 'grid-prestadores';
+        resultsDiv.innerHTML = '';
+        
+        if (data.length === 0) {
+            resultsDiv.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Nenhum prestador encontrado.</p>';
+            return;
+        }
+
+        // Renderiza apenas os primeiros 50 para performance
+        data.slice(0, 50).forEach(item => {
+            const card = document.createElement('div');
+            // Usamos a classe card-prestador do seu style.css
+            card.className = `card-prestador ${item.tipo}`;
+            
+            const textoCopia = `PRESTADOR: ${item.nome}\nCNPJ: ${item.cnpj}\nENDEREÇO: ${item.endereco}\nBAIRRO: ${item.bairro} - ${item.cidade}/${item.estado}\nTEL: ${item.tel}`;
+
+            card.innerHTML = `
+                <span class="zona-tag">${item.zona} - ${item.estado}</span>
+                <div class="prestador-nome">${item.nome}</div>
+                
+                <div class="info-contato">
+                    <p><strong>CNPJ:</strong> ${item.cnpj}</p>
+                    <p>${item.endereco}</p>
+                    <p><strong>${item.bairro}</strong> - ${item.cidade}</p>
+                </div>
+
+                <div style="margin-top: auto;">
+                    <div style="color: var(--accent); font-weight: bold; margin-bottom: 10px;">Tel: ${item.tel}</div>
+                    <button class="app-button search-button" style="width: 100%;" 
+                        onclick="copiar('${textoCopia.replace(/\n/g, '\\n').replace(/'/g, "\\'")}')">
+                        Copiar para Enviar
+                    </button>
+                </div>
+            `;
+            resultsDiv.appendChild(card);
+        });
+    }
+
+    // Função de filtro inteligente para SP e RJ
+    function filtrar() {
+        const termo = document.getElementById('mainBusca').value.toLowerCase();
+        const zonaValue = document.getElementById('zonaFiltro').value;
+        const tipo = document.getElementById('tipoFiltro').value;
+
+        const select = document.getElementById('zonaFiltro');
+        const optSelected = select.options[select.selectedIndex];
+        const grupo = optSelected.parentNode.label || ""; 
+        const estadoAlvo = grupo.includes("SÃO PAULO") ? "SP" : (grupo.includes("RIO DE JANEIRO") ? "RJ" : "");
+
+        const filtrados = database.filter(item => {
+            const matchBusca = (item.nome || "").toLowerCase().includes(termo) || (item.cnpj || "").includes(termo);
+            const matchTipo = tipo === "" || item.tipo === tipo;
+            const matchZona = zonaValue === "" || (item.zona === zonaValue && item.estado === estadoAlvo);
+            return matchBusca && matchTipo && matchZona;
+        });
+        render(filtrados);
+    }
+
+    window.copiar = (t) => {
+        navigator.clipboard.writeText(t.replace(/\\n/g, '\n')).then(() => alert('Dados copiados!'));
+    };
+
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', filtrar));
+
+    window.onload = () => {
+        if (typeof database !== 'undefined') render(database);
+    };
+</script>
+</body>
+</html>

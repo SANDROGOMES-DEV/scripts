@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sua Aplicação</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<button id="btnMenu" class="botao-expandir" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+</button>
+
+<nav id="menuLateral" class="menu-lateral">
+    <a href="inicio.html" class="nav-link">Início</a>
+    <a href="index.html" class="nav-link">Busca de Prestador</a>
+    <a href="conversores.html" class="nav-link">Conversores</a>
+    <a href="procedimentos.html" class="nav-link">Procedimentos</a>
+    <a href="zonas_RJ.html" class="nav-link">Zonas RJ</a>
+</nav>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('menuLateral').classList.toggle('aberto');
+    }
+</script>
+<div class="container">
+    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+        <h1>Base de Procedimentos</h1>
+        <a href="index.html" style="text-decoration:none; color:var(--accent);">← Voltar</a>
+    </header>
+
+    <div class="form-group" style="max-width: 700px; margin: 0 auto 2rem auto;">
+        <input type="file" id="file-input" style="display:none;" accept=".xlsx, .xls, .csv">
+        
+        <label>1. Selecione a Base de Dados (Aba):</label>
+        <select id="select-aba" style="margin-bottom: 15px;">
+            <option value="">Aguardando arquivo...</option>
+        </select>
+
+        <label>2. Filtrar Dados:</label>
+        <input type="text" id="search-term" placeholder="Digite nome do procedimento ou código TUSS..." style="margin-bottom: 15px;">
+        
+        <div style="display: flex; gap: 10px;">
+            <button id="search-button" class="app-button" style="flex: 2; background-color: blue;">FILTRAR</button>
+            <button id="btn-carregar" class="app-button" style="flex: 1; background-color: #333; border: 1px dashed var(--batman-yellow);">
+                CARREGAR ARQUIVO
+            </button>
+        </div>
+    </div>
+
+    <div id="search-status" style="text-align: center; color: #666;">
+        Carregue a planilha para começar.
+    </div>
+
+    <div id="result-grid" class="grid-procedimentos"></div>
+</div>
+
+<script>
+    let dadosCompletos = [];
+    const selectAba = document.getElementById('select-aba');
+    const inputBusca = document.getElementById('search-term');
+    const btnFiltrar = document.getElementById('search-button');
+    const resultGrid = document.getElementById('result-grid');
+    const status = document.getElementById('search-status');
+
+    // Função para ler o arquivo Excel/CSV
+    function processarArquivo(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Preenche o select com as abas da planilha
+            selectAba.innerHTML = workbook.SheetNames.map(name => `<option value="${name}">${name}</option>`).join('');
+            
+            // Salva os dados da primeira aba por padrão
+            carregarDadosAba(workbook, workbook.SheetNames[0]);
+
+            selectAba.onchange = () => carregarDadosAba(workbook, selectAba.value);
+            status.innerText = "Planilha carregada com sucesso!";
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function carregarDadosAba(workbook, sheetName) {
+        const worksheet = workbook.Sheets[sheetName];
+        dadosCompletos = XLSX.utils.sheet_to_json(worksheet);
+        status.innerText = `Aba "${sheetName}" carregada. ${dadosCompletos.length} registros.`;
+        renderizar(dadosCompletos);
+    }
+
+    function renderizar(lista) {
+        resultGrid.innerHTML = lista.map(item => `
+            <div class="item-proc">
+                <span class="esp-tag">${item.ESPECIALIDADE || 'Sem Categoria'}</span>
+                <strong style="display:block; margin: 5px 0;">${item.PROCEDIMENTOS || item.Procedimento || 'N/A'}</strong>
+                <span class="codigo">TUSS: ${item.TUSS || 'N/A'}</span>
+            </div>
+        `).join('');
+    }
+
+    // Lógica de Filtro
+    btnFiltrar.onclick = () => {
+        const termo = inputBusca.value.toLowerCase();
+        const filtrados = dadosCompletos.filter(item => {
+            const nome = String(item.PROCEDIMENTOS || '').toLowerCase();
+            const tuss = String(item.TUSS || '').toLowerCase();
+            return nome.includes(termo) || tuss.includes(termo);
+        });
+        renderizar(filtrados);
+        status.innerText = `${filtrados.length} encontrados.`;
+    };
+
+    // Botão para selecionar arquivo manualmente
+    document.getElementById('btn-carregar').onclick = () => document.getElementById('file-input').click();
+    document.getElementById('file-input').onchange = (e) => processarArquivo(e.target.files[0]);
+</script>
+</body>
+</html>

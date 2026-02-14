@@ -1,0 +1,426 @@
+:root {
+    /* COR VÍVIDA PRINCIPAL: Azul Oceano Vibrante */
+    --accent: #1abc9c;         /* Cor principal de destaque */
+    --accent-hover: #0056b3;   /* Tom mais escuro para efeitos de passar o mouse */
+    
+    /* CORES DE APOIO */
+    --primary: #2c3e50;        /* Cinza azulado escuro para menus e textos fortes */
+    --secondary: #bdc3c7;      /* Cinza claro para o fundo do menu lateral */
+    --bg-light: #f0f2f5;       /* Fundo geral da aplicação */
+    --white: #ffffff;
+    
+    /* CORES DE STATUS (Mantidas para os Cards) */
+    --success: #27ae60;        /* Verde para Rede Própria */
+    --danger: #e74c3c;         /* Vermelho para Rede Credenciada */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-color: var(--accent);
+    margin: 0;
+    color: var(--primary);
+}
+
+/* CONTAINER DAS PÁGINAS */
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/*CARDS BUSCA */
+/* Caixa de Filtros */
+.filter-box {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+}
+
+.filter-box input, .filter-box select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Grid de Prestadores */
+/* Layout em Grade para os Cards */
+.grid-prestadores {
+    display: grid;
+    /* Cria colunas de tamanho igual automaticamente */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    margin-left: 10px;
+}
+/* Card Base */
+.card-prestador {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border-top: 8px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    
+    /* Faz todos os cards terem a mesma altura na mesma linha */
+    display: flex;
+    flex-direction: column;
+    min-height: 220px; 
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-prestador:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+.prestador-nome {
+    font-weight: bold;
+    font-size: 1.05rem;
+    color: var(--primary); /* Nome em cor forte */
+    margin: 10px 0;
+    line-height: 1.2;
+    /* Limita a 2 linhas para não quebrar o layout se o nome for gigante */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.zona-tag {
+    font-size: 0.7rem;
+    background: #f0f0f0;
+    color: #666;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    align-self: flex-end; /* Joga a tag para a direita */
+}
+
+/* Informações de Contato */
+.info-contato {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 15px;
+    flex-grow: 1; /* Faz este bloco ocupar o espaço extra, empurrando o tel para baixo */
+}
+
+.telefone-link {
+    color: var(--accent); /* Telefone na cor vibrante nova */
+    font-weight: bold;
+    font-size: 1rem;
+    text-decoration: none;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+    display: block;
+}
+
+/* Cores por Tipo de Rede */
+.card-prestador.propria { border-top-color: #27ae60; }    /* Verde */
+.card-prestador.credenciada { border-top-color: #e74c3c; } /* Vermelho */
+
+.zona-tag {
+    color: var(--accent);
+    background: #e7f1ff; /* Um fundo azul bem clarinho para combinar */
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    float: right;
+}
+
+/* MENU LATERAL */
+.menu-lateral {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Escondido */
+    width: 260px;
+    height: 100vh;
+    background-color: var(--secondary);
+    z-index: 1001;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    padding-top: 80px;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.2);
+}
+
+.menu-lateral.aberto {
+    left: 0;
+}
+
+.nav-link {
+    padding: 15px 25px;
+    text-decoration: none;
+    color: var(--primary);
+    font-weight: bold;
+    border-left: 5px solid transparent;
+    transition: 0.3s;
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.2);
+    border-left: 5px solid var(--accent);
+}
+
+/* BOTÃO HAMBÚRGUER */
+.botao-expandir {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1002;
+    width: 45px;
+    height: 40px;
+    background: var(--primary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px;
+}
+
+.botao-expandir span {
+    width: 28px;
+    height: 3px;
+    background-color: white;
+}
+
+/* BOTÕES E INPUTS PADRONIZADOS */
+.app-button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    color: white;
+}
+
+.search-button { background-color: var(--accent); }
+.reload-button { 
+    background-color: var(--primary); 
+    border: 1px dashed var(--batman-yellow) !important; 
+}
+
+/* GRID DE RESULTADOS (USADO EM PROCEDIMENTOS) */
+.grid-procedimentos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.item-proc {
+    background: var(--white);
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.item-proc:hover { border-color: var(--accent); }
+
+
+.inicio {
+    text-align: center;
+    margin-top: 50px;
+    color: white;
+}
+
+.grid-inicio, .card-wrapper {
+    display: flex;          /* Coloca os elementos lado a lado */
+    flex-wrap: wrap;        /* Permite que passem para a linha de baixo se não houver espaço */
+    gap: 20px;              /* Espaçamento entre um card e outro */
+    justify-content: flex-start; /* Alinha o grupo à esquerda */
+    padding: 20px;          /* Afasta o conteúdo das bordas internas */
+    margin-left: 10px;      /* Pequeno ajuste para afastar da borda esquerda da tela */
+}
+
+/* Estilo individual do Card */
+.item-ini, .card-inicio {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-left: 2%;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    
+    /* Define que o card terá apenas o tamanho do seu conteúdo */
+    width: fit-content;     
+    min-width: 250px;       /* Garante que não fique pequeno demais */
+    max-width: 350px;       /* Garante que não fique largo demais */
+    
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
+}
+
+.item-ini:hover {
+    transform: translateY(-5px); /* Efeito visual ao passar o rato */
+}
+
+/* Ajustes específicos para a ferramenta de OCR */
+        .upload-area {
+            border: 2px dashed var(--accent);
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            background: #f9f9f9;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .upload-area:hover {
+            background: #f1f7fb;
+            border-color: #1a5276;
+        }
+        #output {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            background: #fff;
+            margin-top: 20px;
+            resize: none;
+        }
+        .preview-img {
+            max-width: 200px;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        /* Estilo pagina Zonas RJ */
+.search-container {
+    margin-top: 20px;       
+    margin-left: 5%;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.search-container {
+    background: white;
+    height: 30% auto;
+    width: 30% auto;
+    border-radius: 12px;
+    margin-left: 30%;
+    margin: 0% auto;
+    margin-top: 5%;
+    padding: 20px;
+    border-top: 8px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    
+    /* Faz todos os cards terem a mesma altura na mesma linha */
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    max-width: 30%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.no-results {
+    text-align: center;
+    color: #777;
+    margin-top: 1%;
+}
+
+/* Estilo para todos os inputs do site */
+input::placeholder {
+    color: #999;          /* Cor cinza clara */
+    font-style: italic;   /* Texto em itálico */
+    opacity: 1;           /* Garante que a cor apareça corretamente no Firefox */
+    font-size: 0.9rem;    /* Tamanho um pouco menor que o texto real */
+}
+
+.search-container h2 {
+    text-align: center; /* Alinha o texto no centro do container */
+    margin-top: 20px;   /* Adiciona um espaço superior se necessário */
+    color: var(--primary); /* Mantém o padrão de cor do seu projeto */
+}
+
+/* Container que envolve todos os cards de região */
+#data-source {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    margin-left: 10px; /* Alinhamento com o seu padrão */
+}
+
+/* O Card Individual da Região */
+.regiao-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border-top: 6px solid var(--accent); /* Azul do seu padrão */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
+}
+
+.regiao-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Cabeçalho do Card (Título + Código) */
+.regiao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.regiao-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+.regiao-header .codigo {
+    background: #e1f5fe;
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+/* Grelha de Bairros dentro do Card */
+.bairros-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Estilo de cada Bairro (estilo tag/badge) */
+.bairros-grid span {
+    font-size: 0.75rem;
+    background: #f0f0f0;
+    color: #555;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid #e0e0e0;
+    transition: 0.2s;
+}
+
+.bairros-grid span:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}

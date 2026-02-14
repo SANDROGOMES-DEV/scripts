@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sua Aplicação</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<button id="btnMenu" class="botao-expandir" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+</button>
+
+<div class="inicio"><h1>Seja bem-vindo(a)!</h1></div>
+
+<nav id="menuLateral" class="menu-lateral">
+    <a href="inicio.html" class="nav-link">Início</a>
+    <a href="index.html" class="nav-link">Busca de Prestador</a>
+    <a href="conversores.html" class="nav-link">Conversores</a>
+    <a href="procedimentos.html" class="nav-link">Procedimentos</a>
+    <a href="zonas_RJ.html" class="nav-link">Zonas RJ</a>
+</nav>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('menuLateral').classList.toggle('aberto');
+    }
+</script>
+<div class="grid-inicio">
+
+    <div class="item-ini">
+        <a href="index.html" class="card-link">
+            <h2>Busca de Prestador</h2>
+            <p>Consulte prestadores por região e tipo de rede.</p>
+    </div>
+
+    <div class="item-ini">
+        <a href="conversores.html" class="card-link">
+            <h2>Conversores</h2>
+            <p>Extraia texto de imagens localmente no seu navegador.</p>
+        </a>
+    </div>
+
+    <div class="item-ini">
+        <a href="procedimentos.html" class="card-link">
+            <h2>Base de Procedimentos</h2>
+            <p>Filtre e consulte códigos TUSS e nomes de procedimentos.</p>
+        </a>
+    </div>
+
+    <div class="item-ini">
+        <a href="zonas_RJ.html" class="card-link">
+            <h2>Zonas RJ</h2>
+            <p>Consulte bairros e regiões das zonas do Rio de Janeiro.</p>
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>
