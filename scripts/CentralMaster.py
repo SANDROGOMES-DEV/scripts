@@ -8,15 +8,25 @@ import re
 import hashlib
 import webbrowser
 import requests
+import asyncio
+import ssl
 from pathlib import Path
 from datetime import datetime
 
 # =====================================================================
 # 1. PROTEÇÕES DE AMBIENTE E REDE CORPORATIVA (CRÍTICO PARA O .EXE)
 # =====================================================================
-# Ignora bloqueios de certificado SSL da rede da empresa
+# Ignora bloqueios de certificado SSL para a biblioteca requests
 requests.packages.urllib3.disable_warnings()
 os.environ['CURL_CA_BUNDLE'] = ''
+
+# PATCH GLOBAL: Força o Python inteiro a ignorar firewalls corporativos (Resolve o erro do Edge-TTS)
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
 
 # Evita o erro "NoneType object has no attribute 'fileno'" no PyInstaller --windowed
 if sys.stdout is None: sys.stdout = open(os.devnull, "w")
@@ -34,7 +44,6 @@ def resource_path(relative_path):
 # 2. AUTO-INSTALAÇÃO INTELIGENTE (ANTI-FORK BOMB)
 # =====================================================================
 def verificar_bibliotecas():
-    # SE FOR UM .EXE, ELE PULA A INSTALAÇÃO (Evita travar a memória RAM)
     if getattr(sys, 'frozen', False):
         return
 
@@ -45,7 +54,7 @@ def verificar_bibliotecas():
         "yt_dlp": "yt-dlp",
         "static_ffmpeg": "static-ffmpeg", 
         "PyPDF2": "PyPDF2",
-        "edge_tts": "edge-tts",  # <--- Nova voz humana neural
+        "edge_tts": "edge-tts",
         "GPUtil": "gputil"
     }
     
@@ -54,14 +63,13 @@ def verificar_bibliotecas():
             __import__(imp)
         except ImportError:
             try:
-                # Instala ignorando erros de SSL do firewall corporativo
                 subprocess.check_call([
                     sys.executable, "-m", "pip", "install", inst, 
                     "--trusted-host", "pypi.org", 
                     "--trusted-host", "files.pythonhosted.org"
                 ])
-            except Exception as e:
-                print(f"Erro ao instalar {inst}: {e}")
+            except Exception:
+                pass 
 
 verificar_bibliotecas()
 
@@ -72,15 +80,14 @@ import customtkinter as ctk
 import psutil
 import static_ffmpeg
 import PyPDF2
+import edge_tts
 
-# Inicializa o FFmpeg
 try:
     static_ffmpeg.add_paths()
     FFMPEG_PATH = shutil.which("ffmpeg")
 except:
     FFMPEG_PATH = None
 
-# Importações tolerantes a falhas
 try: import yt_dlp
 except: yt_dlp = None
 try: import speedtest
@@ -94,7 +101,7 @@ except: GPUtil = None
 class CentralMaster(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("CENTRAL MASTER V8.5 - NEURAL EDITION")
+        self.title("CENTRAL MASTER V9.5 - FIREWALL BYPASS")
         self.geometry("1100x850")
         self.configure(fg_color="#000000")
         
@@ -142,13 +149,11 @@ class CentralMaster(ctk.CTk):
         for widget in self.main_frame.winfo_children(): widget.destroy()
 
     def safe_update(self, widget, **kwargs):
-        """ Atualiza a interface de forma segura (evita crash ao trocar de aba) """
         try:
             if widget.winfo_exists(): widget.configure(**kwargs)
         except: pass
 
     def executar_cmd_silencioso(self, comando):
-        """ Roda comandos sem abrir a janela preta do CMD """
         startupinfo = None
         if os.name == 'nt':
             startupinfo = subprocess.STARTUPINFO()
@@ -249,7 +254,7 @@ class CentralMaster(ctk.CTk):
                     opts = {
                         'outtmpl': f'{path}/%(title)s.%(ext)s', 
                         'quiet': True,
-                        'nocheckcertificate': True, # Bypass SSL
+                        'nocheckcertificate': True, 
                         'ffmpeg_location': FFMPEG_PATH, 
                         'progress_hooks': [hook], 
                         'noplaylist': True
@@ -271,11 +276,10 @@ class CentralMaster(ctk.CTk):
 
     def show_pdf_audio(self):
         self.clear_frame()
-        ctk.CTkLabel(self.main_frame, text="AUDIOBOOK PRO (VOZ NEURAL)", font=("Roboto", 24, "bold"), text_color="#D4AF37").pack(pady=20)
-        lbl = ctk.CTkLabel(self.main_frame, text="Selecione um PDF. Requer internet para gerar voz humana.", text_color="gray")
+        ctk.CTkLabel(self.main_frame, text="AUDIOBOOK PRO (VOZ NEURAL NATIVA)", font=("Roboto", 24, "bold"), text_color="#D4AF37").pack(pady=20)
+        lbl = ctk.CTkLabel(self.main_frame, text="Selecione um PDF. O Firewall foi neutralizado.", text_color="gray")
         lbl.pack(pady=10)
         
-        # Voz humana feminina padrão do Edge TTS
         voz_escolhida = "pt-BR-FranciscaNeural" 
         
         def conv():
@@ -283,35 +287,25 @@ class CentralMaster(ctk.CTk):
             if not pdf_path: return
             
             def run():
-                temp_txt = "temp_livro.txt"
                 out_mp3 = pdf_path.replace(".pdf", ".mp3")
                 
                 try:
                     self.safe_update(lbl, text="1/3: Extraindo texto do PDF...", text_color="#D4AF37")
-                    
                     text = "".join([p.extract_text() for p in PyPDF2.PdfReader(pdf_path).pages])
-                    with open(temp_txt, "w", encoding="utf-8") as f:
-                        f.write(text)
-                        
-                    self.safe_update(lbl, text="2/3: Gerando voz humana pela IA (Aguarde)...", text_color="#00BFFF")
                     
-                    comando = ["edge-tts", "--voice", voz_escolhida, "-f", temp_txt, "--write-media", out_mp3]
+                    self.safe_update(lbl, text="2/3: Conectando à IA Neural (Bypass Ativo)...", text_color="#00BFFF")
                     
-                    startupinfo = None
-                    if os.name == 'nt':
-                        startupinfo = subprocess.STARTUPINFO()
-                        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                        
-                    subprocess.run(comando, check=True, startupinfo=startupinfo)
+                    async def gerar_audio():
+                        communicate = edge_tts.Communicate(text, voz_escolhida)
+                        await communicate.save(out_mp3)
                     
-                    if os.path.exists(temp_txt): os.remove(temp_txt)
+                    asyncio.run(gerar_audio())
                         
                     self.safe_update(lbl, text="3/3: Audiobook gerado com sucesso!", text_color="#00FF00")
                     os.startfile(out_mp3)
                     
                 except Exception as e:
                     self.safe_update(lbl, text=f"Erro na conversão: {e}", text_color="red")
-                    if os.path.exists(temp_txt): os.remove(temp_txt)
 
             threading.Thread(target=run, daemon=True).start()
         
